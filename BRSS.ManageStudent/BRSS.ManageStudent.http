@@ -1,0 +1,6 @@
+@BRSS.ManageStudent_HostAddress = http://localhost:5072
+
+GET {{BRSS.ManageStudent_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
