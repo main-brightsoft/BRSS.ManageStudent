@@ -1,9 +1,11 @@
 using BRSS.ManageStudent.Domain.Entity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BRSS.ManageStudent.Infrastructure.Data;
 
-public class ApplicationDbContext: DbContext
+public class ApplicationDbContext: IdentityDbContext<ApplicationUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -17,8 +19,8 @@ public class ApplicationDbContext: DbContext
             .UsingEntity(x=>x.ToTable("StudentClass"));
         base.OnModelCreating(modelBuilder); 
     }
-    
-    DbSet<ApplicationUser> ApplicationUsers { get; set; }
+
+    public DbSet<ApplicationUser> ApplicationUsers { get; set; }
     DbSet<Student> Students { get; set; }
     DbSet<Class> Classes { get; set; }
 }

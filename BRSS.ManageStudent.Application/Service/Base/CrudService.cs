@@ -36,7 +36,7 @@ public abstract class CrudService<TEntityDTO, TEntityCreateDTO, TEntityUpdateDTO
         await _repository.DeleteAsync(id);
     }
 
-    public async Task DeleteManyAsync(IEnumerable<TKey> ids)
+    public async Task DeleteManyAsync(List<TKey> ids)
     {
         await _repository.DeleteManyAsync(ids);
     }

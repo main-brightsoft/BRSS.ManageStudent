@@ -6,5 +6,5 @@ public class ClassDTO
         
     public string? ClassName { get; set; }
         
-    public ICollection<StudentDTO> Students { get; set; } = new List<StudentDTO>();
+    public List<StudentDTO> Students { get; set; } = new List<StudentDTO>();
 }

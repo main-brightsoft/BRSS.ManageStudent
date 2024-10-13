@@ -1,4 +1,5 @@
 using BRSS.ManageStudent.Application.Interface.Base;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BRSS.ManageStudent.Controllers.Base;
@@ -12,7 +13,7 @@ public abstract class CrudController<TEntityDTO, TEntityCreateDTO, TEntityUpdate
     {
         _service = service;
     }
-
+    
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] TEntityCreateDTO createDTO)
     {
@@ -35,7 +36,7 @@ public abstract class CrudController<TEntityDTO, TEntityCreateDTO, TEntityUpdate
     }
 
     [HttpDelete]
-    public async Task<IActionResult> DeleteMany([FromBody] IEnumerable<TKey> ids)
+    public async Task<IActionResult> DeleteMany([FromBody] List<TKey> ids)
     {
         await _service.DeleteManyAsync(ids);
         return Ok();

@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace BRSS.ManageStudent.Domain.Exception.Base;
+namespace BRSS.ManageStudent.Domain.Exception;
 
 public class BaseException
 {

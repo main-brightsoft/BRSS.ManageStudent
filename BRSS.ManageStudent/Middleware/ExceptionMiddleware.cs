@@ -1,77 +1,78 @@
+using BRSS.ManageStudent.Application.Constants;
 using BRSS.ManageStudent.Domain.Exception;
-using BRSS.ManageStudent.Domain.Exception.Base;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Threading.Tasks;
 
-namespace BRSS.ManageStudent.Middleware;
-
-public class ExceptionMiddleware
+namespace BRSS.ManageStudent.Middleware
 {
-    private readonly RequestDelegate _next;
-    public ExceptionMiddleware(RequestDelegate next)
+    public class ExceptionMiddleware
     {
-        _next = next;
-    }
-    public async Task InvokeAsync(HttpContext context)
-    {
-        try
-        {
-            await _next(context);
-        }
-        catch (Exception e)
-        {
-            await HandleExceptionAsync(context, e);
-        }
-    }
+        private readonly RequestDelegate _next;
 
-    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
-    {
-        Console.WriteLine(exception);
-        context.Response.ContentType = "application/json";
-        if (exception is NotFoundException)
+        public ExceptionMiddleware(RequestDelegate next)
         {
-            context.Response.StatusCode = StatusCodes.Status404NotFound;
-            await context.Response.WriteAsync(
-                text: new BaseException()
-                {
-                    ErrorCode = ((NotFoundException)exception).ErrorCode,
-                    UserMessage = "Không tìm thấy tài nguyên",
-                    DevMessage = exception.Message,
-                    TraceId = context.TraceIdentifier,
-                    MoreInfo = exception.HelpLink,
-
-                }.ToString() ?? "");
+            _next = next;
         }
-        else if (exception is ConflictException)
-        {
-            context.Response.StatusCode = StatusCodes.Status409Conflict;
-            await context.Response.WriteAsync(
-                text: new BaseException()
-                {
-                    ErrorCode = ((ConflictException)exception).ErrorCode,
-                    UserMessage = "Lỗi xung đột tài nguyên",
-                    DevMessage = exception.Message,
-                    TraceId = context.TraceIdentifier,
-                    MoreInfo = exception.HelpLink,
 
-                }.ToString() ?? "");
-        }
-        else
+        public async Task InvokeAsync(HttpContext context)
         {
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await context.Response.WriteAsync(
-                text: new BaseException()
-                {
-                    ErrorCode = context.Response.StatusCode,
-                    UserMessage = "Lỗi hệ thống",
+            try
+            {
+                await _next(context);
+            }
+            catch (Exception e)
+            {
+                await HandleExceptionAsync(context, e);
+            }
+        }
+
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        {
+            Console.WriteLine(exception);
+            context.Response.ContentType = "application/json";
+
+            var baseException = new BaseException
+            {
+                TraceId = context.TraceIdentifier,
+                MoreInfo = exception.HelpLink
+            };
+
+            switch (exception)
+            {
+                case NotFoundException:
+                    context.Response.StatusCode = StatusCodes.Status404NotFound;
+                    baseException.ErrorCode = context.Response.StatusCode;
+                    baseException.UserMessage = exception.Message;
+                    baseException.DevMessage = exception.Message;
+                    break;
+
+                case ConflictException:
+                case EmailNotConfirmedException:
+                    context.Response.StatusCode = StatusCodes.Status409Conflict;
+                    baseException.ErrorCode = exception is EmailNotConfirmedException? CustomStatusCodes.EmailNotConfirmed :context.Response.StatusCode;
+                    baseException.UserMessage = exception.Message;
+                    baseException.DevMessage = exception.Message;
+                    break;
+
+                default:
+                    context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    baseException.ErrorCode = context.Response.StatusCode;
+                    baseException.UserMessage = "An unexpected error occurred.";
 #if DEBUG
-                    DevMessage = exception.Message,
+                    baseException.DevMessage = exception.Message;
 #else
-                    DevMessage = "",
+                    baseException.DevMessage = "";
 #endif
-                    TraceId = context.TraceIdentifier,
-                    MoreInfo = exception.HelpLink,
+                    break;
+            }
 
-                }.ToString() ?? "");
+            await WriteResponseAsync(context, baseException);
+        }
+
+        private async Task WriteResponseAsync(HttpContext context, BaseException baseException)
+        {
+            await context.Response.WriteAsync(baseException.ToString() ?? "");
         }
     }
 }

@@ -5,5 +5,4 @@ namespace BRSS.ManageStudent.Application.Interface;
 
 public interface IStudentService:ICrudService<StudentDTO, StudentCreateDTO, StudentUpdateDTO, Guid>
 {
-    
 }

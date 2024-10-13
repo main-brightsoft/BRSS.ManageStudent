@@ -4,5 +4,5 @@ public class ClassCreateDTO
 {
     public string? ClassName { get; set; }
         
-    public ICollection<Guid> StudentIds { get; set; } = new List<Guid>();
+    public List<Guid> StudentIds { get; set; } = new List<Guid>();
 }

@@ -56,38 +56,7 @@ namespace BRSS.ManageStudent.Infrastructure.Repository.Base
                 throw new Exception($"Failed to delete entity of type {typeof(TEntity).Name}.");
             }
         }
+        public abstract Task DeleteManyAsync(List<TKey> ids);
 
-        public virtual async Task DeleteManyAsync(IEnumerable<TKey> ids)
-        {
-            await _unitOfWork.Context.Database.BeginTransactionAsync();
-            try
-            {
-                var entitiesToDelete = await _unitOfWork.Context.Set<TEntity>()
-                    .Where(e => ids.Contains(e.GetId()))
-                    .ToListAsync();
-
-                if (!entitiesToDelete.Any())
-                {
-                    throw new Exception("No entities found to delete.");
-                }
-
-                _unitOfWork.Context.Set<TEntity>().RemoveRange(entitiesToDelete);
-
-                var result = await _unitOfWork.Context.SaveChangesAsync();
-        
-                if (result == 0)
-                {
-                    throw new Exception("Failed to delete the specified entities.");
-                }
-
-                await _unitOfWork.CommitAsync();
-            }
-            catch (Exception ex)
-            {
-                await _unitOfWork.RollbackAsync();
-                throw new Exception("Transaction failed during deleting entities.", ex);
-            }
-        }
-        
     }
 }

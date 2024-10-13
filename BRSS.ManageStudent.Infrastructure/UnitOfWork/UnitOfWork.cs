@@ -11,12 +11,6 @@ namespace BRSS.ManageStudent.Infrastructure.UnitOfWork;
 
     public DbContext Context { get; } = context;
     
-
-    public Task<int> SaveChangesAsync()
-    {
-        throw new NotImplementedException();
-    }
-
     public void BeginTransaction()
     {
         _transaction ??= Context.Database.BeginTransaction();

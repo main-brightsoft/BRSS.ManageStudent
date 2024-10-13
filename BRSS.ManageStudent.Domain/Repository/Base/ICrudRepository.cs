@@ -7,5 +7,5 @@ public interface ICrudRepository<TEntity,TKey>: IReadOnlyRepository<TEntity, TKe
     Task<TEntity> AddAsync(TEntity entity);
     Task<TEntity> UpdateAsync(TEntity entity);
     Task DeleteAsync(TKey id);
-    Task DeleteManyAsync(IEnumerable<TKey> ids);
+    Task DeleteManyAsync(List<TKey> ids);
 }

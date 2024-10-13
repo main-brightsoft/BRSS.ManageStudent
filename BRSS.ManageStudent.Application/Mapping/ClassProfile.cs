@@ -6,7 +6,7 @@ namespace BRSS.ManageStudent.Application.Mapping;
 
 public class ClassProfile: Profile
 {
-    public ClassProfile()
+    public ClassProfile()   
     {
         CreateMap<Class, ClassDTO>();
         CreateMap<ClassCreateDTO, Class>();

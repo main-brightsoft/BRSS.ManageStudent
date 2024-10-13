@@ -8,16 +8,6 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     </ItemGroup>
 
@@ -25,6 +15,12 @@
       <ProjectReference Include="..\BRSS.ManageStudent.Application\BRSS.ManageStudent.Application.csproj" />
       <ProjectReference Include="..\BRSS.ManageStudent.Domain\BRSS.ManageStudent.Domain.csproj" />
       <ProjectReference Include="..\BRSS.ManageStudent.Infrastructure\BRSS.ManageStudent.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="BRSS.ManageStudent.Infrastructure">
+        <HintPath>..\BRSS.ManageStudent.Infrastructure\bin\Debug\net8.0\BRSS.ManageStudent.Infrastructure.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

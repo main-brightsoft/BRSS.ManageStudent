@@ -44,4 +44,36 @@ public class StudentRepository(IUnitOfWork unitOfWork) : CrudRepository<Student,
             throw new Exception($"Failed to delete entity of type {nameof(Student)}.");
         }
     }
+
+    public override async Task DeleteManyAsync(List<Guid> ids)
+    {
+        await _unitOfWork.BeginTransactionAsync();
+        try
+        {
+            var entitiesToDelete = await _unitOfWork.Context.Set<Student>()
+                .Where(e => ids.Contains(e.Id))
+                .ToListAsync();
+
+            if (!entitiesToDelete.Any())
+            {
+                throw new NotFoundException("No entities found to delete.");
+            }
+
+            _unitOfWork.Context.Set<Student>().RemoveRange(entitiesToDelete);
+
+            var result = await _unitOfWork.Context.SaveChangesAsync();
+        
+            if (result == 0)
+            {
+                throw new Exception("Failed to delete the specified entities.");
+            }
+
+            await _unitOfWork.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await _unitOfWork.RollbackAsync();
+            throw new Exception("Transaction failed during deleting entities.", ex);
+        }
+    }
 }

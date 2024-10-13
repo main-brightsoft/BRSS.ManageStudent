@@ -8,5 +8,5 @@ public interface ICrudService<TEntityDTO, TEntityCreateDTO, TEntityUpdateDTO,TKe
     Task<TEntityDTO> AddAsync(TEntityCreateDTO entity);
     Task<TEntityDTO> UpdateAsync(TKey id, TEntityUpdateDTO entity);
     Task DeleteAsync(TKey id);
-    Task DeleteManyAsync(IEnumerable<TKey> ids);
+    Task DeleteManyAsync(List<TKey> ids);
 }

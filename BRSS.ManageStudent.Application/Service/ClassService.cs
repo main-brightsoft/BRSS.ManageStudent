@@ -37,9 +37,8 @@ public class ClassService:CrudService<ClassDTO, ClassCreateDTO, ClassUpdateDTO, 
         @class.Students = await FetchStudentsByIds(entityUpdateDTO.StudentIds);
         return @class;
     }
-    private async Task<List<Student>> FetchStudentsByIds(IEnumerable<Guid> studentIds)
+    private async Task<List<Student>> FetchStudentsByIds(List<Guid> studentIds)
     {
-        var students = await _studentRepository.GetByIdsAsync(studentIds);
-        return students.ToList();
+        return await _studentRepository.GetByIdsAsync(studentIds);
     }
 }

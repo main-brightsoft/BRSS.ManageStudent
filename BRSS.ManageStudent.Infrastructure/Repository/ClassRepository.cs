@@ -30,13 +30,11 @@ public class ClassRepository(IUnitOfWork unitOfWork) : CrudRepository<Class, Gui
 
     public override async Task<Class> UpdateAsync(Class entity)
     {
-        await _unitOfWork.Context.Database.BeginTransactionAsync();
+        await _unitOfWork.BeginTransactionAsync();
         try
         {
-            var existingClass = await _unitOfWork.Context.Set<Class>()
-                .Include(c => c.Students)
-                .FirstOrDefaultAsync(c => c.Id == entity.Id);
-
+            var existingClass = await _unitOfWork.Context.Set<Class>().Include(c => c.Students).FirstOrDefaultAsync(c => c.Id == entity.Id);
+        
             if (existingClass == null)
             {
                 throw new Exception($"Class with ID {entity.Id} not found.");
@@ -45,21 +43,67 @@ public class ClassRepository(IUnitOfWork unitOfWork) : CrudRepository<Class, Gui
             _unitOfWork.Context.Entry(existingClass).CurrentValues.SetValues(entity);
 
             existingClass.Students.Clear();
+            existingClass.Students.AddRange(entity.Students);
+            
+            await _unitOfWork.Context.SaveChangesAsync();
+            await _unitOfWork.CommitAsync();
+            
+            return entity;
+        }
+        catch (Exception ex)
+        {
+            await _unitOfWork.RollbackAsync();
+            throw new Exception("Transaction failed during deleting entities.", ex);
+        }
+    }
+    
+    public override async Task DeleteAsync(Guid id)
+    {
+        var entity = await _unitOfWork.Context.Set<Class>()
+            .Include(s => s.Students)
+            .FirstOrDefaultAsync(s => s.Id == id);
+        if (entity == null) 
+        {
+            throw new Exception($"Entity of type {nameof(Class)} with ID {id} was not found for deletion.");
+        }
+        entity.Students.Clear();
+        _unitOfWork.Context.Set<Class>().Remove(entity);
+        var result = await _unitOfWork.Context.SaveChangesAsync();
+            
+        if (result == 0) 
+        {
+            throw new Exception($"Failed to delete entity of type {nameof(Class)}.");
+        }
+    }
+    
+    public override async Task DeleteManyAsync(List<Guid> ids)
+    {
+        await _unitOfWork.BeginTransactionAsync();
+        try
+        {
+            var entitiesToDelete = await _unitOfWork.Context.Set<Class>()
+                .Where(e => ids.Contains(e.Id))
+                .Include(s => s.Students)
+                .ToListAsync();
 
-            foreach (var student in entity.Students)
+            if (!entitiesToDelete.Any())
             {
-                existingClass.Students.Add(student);
+                throw new NotFoundException("No entities found to delete.");
+            }
+            foreach (var classEntity in entitiesToDelete)
+            {
+                classEntity.Students.Clear();
+                _unitOfWork.Context.Set<Class>().Remove(classEntity);
             }
 
             var result = await _unitOfWork.Context.SaveChangesAsync();
-
+        
             if (result == 0)
             {
-                throw new Exception($"Failed to update entity of type {nameof(Class)}.");
+                throw new Exception("Failed to delete the specified entities.");
             }
+
             await _unitOfWork.CommitAsync();
-            
-            return existingClass;
         }
         catch (Exception ex)
         {

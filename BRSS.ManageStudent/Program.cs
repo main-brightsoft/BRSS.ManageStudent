@@ -1,12 +1,10 @@
-using BRSS.ManageStudent.Application.DTO;
 using BRSS.ManageStudent.Application.Interface;
-using BRSS.ManageStudent.Application.Interface.Base;
 using BRSS.ManageStudent.Application.Service;
-using BRSS.ManageStudent.Application.Service.Base;
 using BRSS.ManageStudent.Application.UnitOfWork;
 using BRSS.ManageStudent.Domain.Entity;
-using BRSS.ManageStudent.Domain.Exception.Base;
+using BRSS.ManageStudent.Domain.Exception;
 using BRSS.ManageStudent.Domain.Repository;
+using BRSS.ManageStudent.Infrastructure.Config;
 using BRSS.ManageStudent.Infrastructure.Data;
 using BRSS.ManageStudent.Infrastructure.Repository;
 using BRSS.ManageStudent.Infrastructure.UnitOfWork;
@@ -62,10 +60,12 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 //Configure Cors
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("BRSSApp", policy =>
-    {
-        policy.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
-    });
+    options.AddPolicy("BRSSApp", policy =>policy
+        .WithOrigins("http://localhost:5173")
+        .AllowAnyMethod()                     
+        .AllowAnyHeader()                  
+        .AllowCredentials()
+    );
 });
 
 //Add Scope
@@ -74,7 +74,12 @@ builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IClassService, ClassService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+//
+builder.Services.Configure<GoogleOAuthConfig>(builder.Configuration.GetSection("OAuth2:Google"));
 
 // Register AutoMapper with all assemblies
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

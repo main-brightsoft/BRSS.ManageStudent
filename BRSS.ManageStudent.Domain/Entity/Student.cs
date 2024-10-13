@@ -15,7 +15,7 @@ namespace BRSS.ManageStudent.Domain.Entity
 
         public string? Address { get; set; } = string.Empty;
         [JsonIgnore]
-        public virtual ICollection<Class> Classes { get; set; } = new List<Class>();
+        public List<Class> Classes { get; set; } = new List<Class>();
         
         public Guid GetId()
         {
